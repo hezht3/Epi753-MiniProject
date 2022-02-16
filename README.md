@@ -1,2 +1,2 @@
 # Epi753-MiniProject
-JHSPH 340.753.01 MiniProject code
+This is the repo for the Mini Project of 340.753.01
