@@ -28,13 +28,33 @@ data %>%
                                  prior ~ "{n} ({p}%)"),
                 digits = list(all_continuous() ~ 1,
                               paids ~ c(0, 1),
-                              prior ~ c(0, 1)))
+                              prior ~ c(0, 1))) %>% 
+    add_overall()
+
+
+###### sensitivity analysis - missing values
+data %>% 
+    mutate(missing = case_when(is.na(bmi) == TRUE ~ "yes",
+                               TRUE ~ "no")) %>% 
+    select(age:anemia, missing) %>% 
+    tbl_summary(by = "missing",
+                statistic = list(age ~ "{mean} ({sd})",
+                                 bmi ~ "{mean} ({sd})",
+                                 paids ~ "{n} ({p}%)",
+                                 prior ~ "{n} ({p}%)"),
+                digits = list(all_continuous() ~ 1,
+                              paids ~ c(0, 1),
+                              prior ~ c(0, 1))) %>% 
+    add_overall()
 
 
 ###### log-binomial regression
 
 glm(cd4lt200 ~ anemia, data = data, family = binomial(link = "log")) %>% 
     tbl_regression(exponentiate = TRUE)
+
+glm(cd4lt200 ~ anemia, data = data %>% filter(is.na(bmi) == FALSE), family = binomial(link = "log")) %>% 
+    tbl_regression(exponentiate = TRUE)   # obs without missing values - sensitivity analysis
 
 glm(cd4lt200 ~ anemia + age + bmi + paids + prior, data = data, family = binomial(link = "log")) %>% 
     tbl_regression(exponentiate = TRUE)   # fail to converge
